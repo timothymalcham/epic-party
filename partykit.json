@@ -5,6 +5,6 @@
   "compatibilityDate": "2024-01-22",
   "serve": "public",
   "parties": {
-    "poll": "party/poll.ts"
+    "count": "party/count.ts"
   }
 }

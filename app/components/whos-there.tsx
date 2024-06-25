@@ -1,16 +1,18 @@
 import { usePartySocket } from 'partysocket/react'
 import { useState } from 'react'
-import type { State } from '../../messages'
+import type { State } from '../../types/party'
 
 // This is a component that will connect to the partykit backend
-// and display the number of connected users, and where they're from.
+// and display the number of connected users.
 export default function WhosHere() {
 	const [users, setUsers] = useState<State | undefined>()
 
 	usePartySocket({
+		// Should use 127.0.0.1:1999 in development and use the actual partykit server
+		// in production ([project].[username].partykit.dev)
 		host: '127.0.0.1:1999',
-		// connect to the party defined by 'poll.ts'
-		party: 'poll',
+		// connect to the party defined by 'count.ts'
+		party: 'count',
 		// this can be any name, we just picked 'index'
 		room: 'index',
 		onMessage(evt) {
