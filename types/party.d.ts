@@ -6,10 +6,9 @@
 
 export type State = {
 	total: number
-}
-
-export type Poll = {
-	title: string
-	options: Array<string>
-	votes?: Array<number>
+	poll: {
+		title?: string
+		options: Array<string>
+		votes?: Array<number>
+	} | null
 }

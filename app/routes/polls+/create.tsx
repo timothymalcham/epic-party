@@ -1,16 +1,20 @@
-import { z } from 'zod'
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
 import {
 	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
 	json,
+	type LoaderFunctionArgs,
+	redirect,
 } from '@remix-run/node'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { Form, useActionData } from '@remix-run/react'
+import { z } from 'zod'
 import { Field } from '#app/components/forms.tsx'
 import { StatusButton } from '#app/components/ui/status-button.tsx'
+import { requireUserId } from '#app/utils/auth.server.ts'
 import { useIsPending } from '#app/utils/misc.tsx'
+import { type Poll } from '../../../types/party'
+
+const randomId = () => Math.random().toString(36).substring(2, 10)
 
 const schema = z.object({
 	title: z.string(),
@@ -37,6 +41,31 @@ export async function action({ request }: ActionFunctionArgs) {
 			{ status: submission.status === 'error' ? 400 : 200 },
 		)
 	}
+
+	const title = formData.get('title')?.toString() ?? 'Anonymous poll'
+	const options: string[] = []
+
+	for (const [key, value] of formData.entries()) {
+		if (key.startsWith('option') && value.toString().trim().length > 0) {
+			options.push(value.toString())
+		}
+	}
+
+	const pollId = randomId()
+	const poll: Poll = {
+		title,
+		options,
+	}
+
+	await fetch(`${process.env.PARTYKIT_URL}/party/${pollId}`, {
+		method: 'POST',
+		body: JSON.stringify(poll),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	})
+
+	return redirect(`/polls/${pollId}`)
 }
 
 export default function CreatePollRoute() {
@@ -87,7 +116,7 @@ export default function CreatePollRoute() {
 							type="submit"
 							disabled={isPending}
 						>
-							Log in
+							Create Poll
 						</StatusButton>
 					</div>
 				</Form>
